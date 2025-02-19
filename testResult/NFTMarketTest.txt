@@ -1,0 +1,15 @@
+richard@DESKTOP-6KN4CUE:~/openspace$ forge test --mc NFTMarket
+[⠊] Compiling...
+No files changed, compilation skipped
+
+Ran 7 tests for test/NFTMarketTest.sol:NFTMarketTest
+[PASS] testBuyNFT() (gas: 223847)
+[PASS] testBuyNFTTwice() (gas: 220084)
+[PASS] testBuyNFTWithExcessTokens() (gas: 223899)
+[PASS] testBuyOwnNFT() (gas: 222830)
+[PASS] testFuzzyListingAndBuying(address,address,uint256) (runs: 256, μ: 252540, ~: 252540)
+[PASS] testListNFT() (gas: 192755)
+[PASS] testNoTokenBalanceInMarket() (gas: 13663)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 373.41ms (374.15ms CPU time)
+
+Ran 1 test suite in 379.77ms (373.41ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
