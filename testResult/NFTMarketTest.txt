@@ -3,13 +3,14 @@ richard@DESKTOP-6KN4CUE:~/openspace$ forge test --mc NFTMarket
 No files changed, compilation skipped
 
 Ran 7 tests for test/NFTMarketTest.sol:NFTMarketTest
-[PASS] testBuyNFT() (gas: 223847)
+[PASS] invariantNoTokenBalanceInMarket() (runs: 256, calls: 128000, reverts: 98222)
+[PASS] testBuyNFT() (gas: 223864)
 [PASS] testBuyNFTTwice() (gas: 220084)
 [PASS] testBuyNFTWithExcessTokens() (gas: 223899)
-[PASS] testBuyOwnNFT() (gas: 222830)
-[PASS] testFuzzyListingAndBuying(address,address,uint256) (runs: 256, μ: 252540, ~: 252540)
+[PASS] testBuyOwnNFT() (gas: 222852)
+[PASS] testFuzzyListingAndBuying(address,address,uint256) (runs: 256, μ: 252470, ~: 252468)
 [PASS] testListNFT() (gas: 192755)
-[PASS] testNoTokenBalanceInMarket() (gas: 13663)
-Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 373.41ms (374.15ms CPU time)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 10.89s (11.30s CPU time)
 
-Ran 1 test suite in 379.77ms (373.41ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
+Ran 1 test suite in 10.89s (10.89s CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
+richard@DESKTOP-6KN4CUE:~/openspace$ 

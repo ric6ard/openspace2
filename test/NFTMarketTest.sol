@@ -99,7 +99,6 @@ contract NFTMarketTest is Test {
         // vm.assume(randomBuyer.code.length >0);
         // Transfer tokens to randomSeller and randomBuyer
         // token.transfer(randomSeller, price);
-        
 
         vm.startPrank(randomSeller);
         nft.mint(randomSeller, "tokenURI");
@@ -115,7 +114,7 @@ contract NFTMarketTest is Test {
         vm.stopPrank();
     }
 
-    function testNoTokenBalanceInMarket() public view {
+    function invariantNoTokenBalanceInMarket() public view {
         uint256 initialBalance = token.balanceOf(address(market));
         assertEq(initialBalance, 0);
     }
