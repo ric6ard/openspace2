@@ -3,12 +3,35 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Script.sol";
 import "../src/MyFirstToken.sol";
+import "../src/SolidityBank.sol";
+import "../src/SimpleMultiSig.sol";
 
-contract DeployScript is Script {
+contract DeployMyFirstToken is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey); //开始广播交易
         new MyFirstToken("FakeKKToken", "FKK");
+        vm.stopBroadcast();
+    }
+}
+
+contract DeploySolidityBank is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey); //开始广播交易
+        new SolidityBank();
+        vm.stopBroadcast();
+    }
+}
+
+contract DeploySimpleMultiSig is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
+        vm.startBroadcast(deployerPrivateKey);
+        address[] memory owners = new address[](2);
+        owners[0] = 0x36912Eb785f5A358Fc0EA9Cd0FB87041907B59c5;
+        owners[1] = 0xE9d2E42129C04f5627f7894aABD422B8a76737aD;
+        new SimpleMultiSig(owners,2);
         vm.stopBroadcast();
     }
 }

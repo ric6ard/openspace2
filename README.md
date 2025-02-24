@@ -51,13 +51,6 @@ $ anvil
 $ forge script script/Deploy.s.sol:DeployScript --rpc-url <your_rpc_url> --private-key <your_private_key>
 ```
 
-### Verify Contract
-
-```shell
-$ export calldata="$(cast abi-encode 'constructor(string memory name_, string memory symbol_)' FakeKKToken FKK)"
-$ forge verify-contract --chain sepolia --constructor-args $calldata 0xa4cD0246Bc7A90532ccEc84F2A2F6df1B59e052d MyFirstToken --etherscan-api-key $ETHERSCAN_API_KEY
-```
-
 ### Cast
 
 ```shell
