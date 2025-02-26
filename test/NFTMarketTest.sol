@@ -114,7 +114,7 @@ contract NFTMarketTest is Test {
         vm.stopPrank();
     }
 
-    function invariantNoTokenBalanceInMarket() public {
+    function invariantNoTokenBalanceInMarket() public view {
         uint256 initialBalance = token.balanceOf(address(market));
         assertEq(initialBalance, 0);
     }

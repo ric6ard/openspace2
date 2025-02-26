@@ -5,6 +5,27 @@ import "forge-std/Script.sol";
 import "../src/MyFirstToken.sol";
 import "../src/SolidityBank.sol";
 import "../src/SimpleMultiSig.sol";
+import "../src/LLCToken2612.sol";
+import "../src/TokenBank.sol";
+
+
+contract DeployTokenBank is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey); //开始广播交易
+        new TokenBank();
+        vm.stopBroadcast();
+    }
+}
+
+contract DeployLLCToken2612 is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey); //开始广播交易
+        new LLCToken2612();
+        vm.stopBroadcast();
+    }
+}
 
 contract DeployMyFirstToken is Script {
     function run() external {
