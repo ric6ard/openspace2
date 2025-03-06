@@ -4,17 +4,17 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "../src/NFTMarket.sol";
 import "../src/MyERC721.sol";
-import "../src/BaseERC20WithHook.sol";
+import "../src/LLCToken2612.sol";
 
 contract NFTMarketTest is Test {
     NFTMarket market;
     MyERC721 nft;
-    BaseERC20WithHook token;
+    LLCToken2612 token;
     address seller;
     address buyer;
 
     function setUp() public {
-        token = new BaseERC20WithHook();
+        token = new LLCToken2612();
         nft = new MyERC721();
         market = new NFTMarket(token, nft);
         seller = address(0x1);

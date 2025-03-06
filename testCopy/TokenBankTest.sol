@@ -16,13 +16,14 @@ contract TokenBankTest is Test {
     function setUp() public {
         owner = address(this);
 
-        // (user, privateKey) = makeAddrAndKey("user");
-        privateKey = vm.envUint("PRIVATE_KEY");
-        user = vm.addr(privateKey);
-
+        (user, privateKey) = makeAddrAndKey("user");
         token = new LLCToken2612();
         tokenBank = new TokenBank();
         tokenBank.addToken(address(token));
+
+        // privateKey = vm.envUint("PRIVATE_KEY");
+        // user = vm.addr(privateKey);
+
         token.transfer(user, 1000 * 10**18);
     }
 
