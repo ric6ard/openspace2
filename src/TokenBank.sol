@@ -16,7 +16,6 @@ contract TokenBank is Ownable {
 
     constructor()Ownable(msg.sender) {
         // 部署者为管理员
-        // transferOwnership(msg.sender);
     }
 
     function addToken(address token) external onlyOwner {
@@ -50,6 +49,11 @@ contract TokenBank is Ownable {
         IERC20Permit(token).permit(msg.sender, address(this), amount, deadline, v, r, s);
         deposit(token, amount);
     }
+
+    function depositWithPermit2() public {
+        // TODO
+    }
+
 
     function withdraw(address token, uint256 amount) public {
         require(supportedTokens[token], "Token not supported");
