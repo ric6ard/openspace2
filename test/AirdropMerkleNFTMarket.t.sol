@@ -10,10 +10,12 @@ contract AirdropMerkleNFTMarketTest is Test {
     AirdropMerkleNFTMarket market;
     LLCToken2612 token;
     MyERC721 nft;
+
+    uint256 buyerPrivateKey = 0xa11ce;
     
     address owner = address(1);
     address seller = address(2);
-    address buyer = address(3);
+    address buyer = vm.addr(buyerPrivateKey);
     address nonWhitelisted = address(4);
     
     uint256 tokenId = 1;
@@ -70,6 +72,22 @@ contract AirdropMerkleNFTMarketTest is Test {
         vm.stopPrank();
     }
     
+    function testPermitPrePay() public {
+        // Generate permit signature for token approval
+        uint256 deadline = 1800000000;
+        bytes32 PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+        bytes32 hash = keccak256(abi.encode(PERMIT_TYPEHASH, buyer, address(market), 100 ether, 0, deadline));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", token.DOMAIN_SEPARATOR(), hash));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(buyerPrivateKey, digest);
+
+        // Execute permitBuy
+        vm.prank(buyer);
+        market.permitPrePay(100 ether, deadline, v, r, s);
+
+        // Check ownership and balances
+        assertEq(token.allowance(buyer, address(market)), 100 ether);
+    }
+
     function testClaimNFT() public {
         // List NFT first
         vm.startPrank(seller);
