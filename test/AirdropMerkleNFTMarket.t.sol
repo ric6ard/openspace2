@@ -48,6 +48,13 @@ contract AirdropMerkleNFTMarketTest is Test {
         merkleProof = new bytes32[](0);
     }
 
+    function buyerSignature(uint256 amount, uint256 deadline) public view returns (uint8, bytes32, bytes32) {
+        bytes32 PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+        bytes32 hash = keccak256(abi.encode(PERMIT_TYPEHASH, buyer, address(market), amount, 0, deadline));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", token.DOMAIN_SEPARATOR(), hash));
+        return vm.sign(buyerPrivateKey, digest);
+    }
+
     function testListNFT() public {
         vm.startPrank(seller);
         nft.approve(address(market), tokenId);
@@ -73,17 +80,9 @@ contract AirdropMerkleNFTMarketTest is Test {
     }
     
     function testPermitPrePay() public {
-        // Generate permit signature for token approval
-        uint256 deadline = 1800000000;
-        bytes32 PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-        bytes32 hash = keccak256(abi.encode(PERMIT_TYPEHASH, buyer, address(market), 100 ether, 0, deadline));
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", token.DOMAIN_SEPARATOR(), hash));
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(buyerPrivateKey, digest);
-
-        // Execute permitBuy
+        (uint8 v, bytes32 r, bytes32 s) = buyerSignature(100 ether, 1800000000);
         vm.prank(buyer);
-        market.permitPrePay(100 ether, deadline, v, r, s);
-
+        market.permitPrePay(100 ether, 1800000000, v, r, s);
         // Check ownership and balances
         assertEq(token.allowance(buyer, address(market)), 100 ether);
     }
@@ -149,13 +148,21 @@ contract AirdropMerkleNFTMarketTest is Test {
         market.listNFT(tokenId, price);
         vm.stopPrank();
         
-        // Create permit signature (mocked since we can't sign in tests)
+        // Create permit signature
         vm.startPrank(buyer);
-        token.approve(address(market), price/2);
+        (uint8 v, bytes32 r, bytes32 s) = buyerSignature(price/2, 1800000000);
         
         // Create multicall data
-        bytes[] memory calls = new bytes[](1);
+        bytes[] memory calls = new bytes[](2);
         calls[0] = abi.encodeWithSelector(
+            market.permitPrePay.selector,
+            price/2,
+            1800000000,
+            v,
+            r,
+            s  
+        );
+        calls[1] = abi.encodeWithSelector(
             market.claimNFT.selector,
             tokenId,
             price/2,
