@@ -1,0 +1,7 @@
+{
+    "testing.coverageBarThresholds": {
+        "red": 0,
+        "yellow": 60,
+        "green": 90
+    }
+}
