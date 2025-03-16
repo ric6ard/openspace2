@@ -41,6 +41,7 @@ contract StakingMining {
         require(IERC20(RNT).transferFrom(msg.sender, address(this), amount), "Transfer failed");
         stakedAmount[msg.sender] += amount;
         totalStakedRNT += amount;
+        lastClaimTime[msg.sender] = block.timestamp;
     }
 
     function unstake(uint256 amount) external {
