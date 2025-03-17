@@ -4,6 +4,8 @@ out = "out"
 libs = ["lib"]
 optimizer = true
 via_ir = true
+rpc_url = "${SEPOLIA_RPC_URL}"
+etherscan_api_key = "${ETHERSCAN_API_KEY}"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
@@ -12,3 +14,4 @@ sepolia = "${SEPOLIA_RPC_URL}"
 
 [etherscan]
 sepolia = { key = "${ETHERSCAN_API_KEY}" }
+

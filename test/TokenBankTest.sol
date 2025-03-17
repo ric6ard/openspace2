@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import "../src/TokenBank.sol";
+import "forge-std/console.sol";
 import "../src/LLCToken2612.sol";
 
 contract TokenBankTest is Test {
@@ -85,4 +86,53 @@ contract TokenBankTest is Test {
         tokenBank.removeToken(newToken);
         assertFalse(tokenBank.supportedTokens(newToken));
     }
+
+    function testCheckUpkeep() public {
+        vm.startPrank(user);
+        token.approve(address(tokenBank), 20 * 10**18);
+        tokenBank.deposit(address(token), 20 * 10**18);
+        console.log("balance (expected 20) : ", token.balanceOf(address(tokenBank)));
+        vm.stopPrank();
+
+        bytes memory checkData = abi.encode(address(token), 100 * 10**18);
+        console.log("checkData : ");
+        console.logBytes(checkData);
+        (bool upkeepNeeded, bytes memory performData) = tokenBank.checkUpkeep(checkData);
+
+        assertFalse(upkeepNeeded);
+
+        vm.startPrank(user);
+        token.approve(address(tokenBank), 50 * 10**18);
+        tokenBank.deposit(address(token), 50 * 10**18);
+        token.approve(address(tokenBank), 50 * 10**18);
+        tokenBank.deposit(address(token), 50 * 10**18);
+        console.log("balance (expected 120) : ", token.balanceOf(address(tokenBank)));
+        vm.stopPrank();
+
+        (upkeepNeeded, performData) = tokenBank.checkUpkeep(checkData);
+
+        assertTrue(upkeepNeeded);
+        assertEq(performData, abi.encode(address(token), 100 * 10**18));
+    }
+
+    function testPerformUpkeep() public {
+        vm.startPrank(user);
+        token.approve(address(tokenBank), 50 * 10**18);
+        tokenBank.deposit(address(token), 50 * 10**18);
+        token.approve(address(tokenBank), 50 * 10**18);
+        tokenBank.deposit(address(token), 50 * 10**18);
+        token.approve(address(tokenBank), 50 * 10**18);
+        tokenBank.deposit(address(token), 50 * 10**18);
+        vm.stopPrank();
+
+        bytes memory performData = abi.encode(address(token), 100 * 10**18);
+        console.logBytes(performData);
+        vm.prank(owner);
+        uint perviousBalance = token.balanceOf(owner);
+        tokenBank.performUpkeep(performData);
+        uint currentBalance = token.balanceOf(owner);
+        assertEq(currentBalance - perviousBalance, 50 * 10**18);
+
+    }
 }
+

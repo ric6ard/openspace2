@@ -5,14 +5,21 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface AutomationCompatibleInterface {
+    function checkUpkeep(bytes calldata checkData) external returns (bool upkeepNeeded, bytes memory performData);
+    function performUpkeep(bytes calldata performData) external;
+}
 contract TokenBank is Ownable {
     mapping(address => bool) public supportedTokens;
     mapping(address => mapping(address => uint256)) private balances;
+
+    // uint256 upkeepLimit = 100 ether;
 
     event Deposit(address indexed user, address indexed token, uint256 amount);
     event Withdrawal(address indexed user, address indexed token, uint256 amount);
     event TokenAdded(address indexed token);
     event TokenRemoved(address indexed token);
+    event UpkeepPerformed(address indexed token, address indexed admin, uint256 amount);
 
     constructor()Ownable(msg.sender) {
         // 部署者为管理员
@@ -68,5 +75,21 @@ contract TokenBank is Ownable {
 
     function balanceOf(address token, address user) public view returns (uint256) {
         return balances[token][user];
+    }
+
+    function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData) {
+        (address token, uint256 limit) = abi.decode(checkData, (address, uint256));
+        upkeepNeeded = IERC20(token).balanceOf(address(this)) > limit;
+        performData = abi.encode(token, limit);
+    }
+
+    function performUpkeep(bytes calldata performData) external {
+        (address token, uint256 limit) = abi.decode(performData, (address, uint256));
+        address admin = owner();
+        uint amount = limit/2;
+        require(IERC20(token).balanceOf(address(this)) > limit , "Upkeep not needed");
+        require(IERC20(token).transfer(admin, amount), "Token transfer failed");
+
+        emit UpkeepPerformed(token, admin, amount);
     }
 }
