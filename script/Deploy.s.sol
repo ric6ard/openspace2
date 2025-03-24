@@ -7,7 +7,16 @@ import "../src/SolidityBank.sol";
 import "../src/SimpleMultiSig.sol";
 import "../src/LLCToken2612.sol";
 import "../src/TokenBank.sol";
+import "../src/NFTPersaleFollowing/NFTPersale.sol";
 
+contract DeployOpenSpaceNFT is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey); //开始广播交易
+        new OpenspaceNFT();
+        vm.stopBroadcast();
+    }
+}
 
 contract DeployTokenBank is Script {
     function run() external {

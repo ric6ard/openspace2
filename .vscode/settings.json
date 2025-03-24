@@ -3,5 +3,6 @@
         "red": 0,
         "yellow": 60,
         "green": 90
-    }
+    },
+    "solidity.compileUsingRemoteVersion": "v0.8.28+commit.7893614a"
 }

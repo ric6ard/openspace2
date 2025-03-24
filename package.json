@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**",
   "main": "index.js",
+  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "test"
@@ -22,8 +23,13 @@
   },
   "homepage": "https://github.com/ric6ard/openspace2#readme",
   "dependencies": {
+    "@flashbots/ethers-provider-bundle": "^0.6.2",
     "@openzeppelin/contracts": "^5.2.0",
     "@uniswap/v2-core": "^1.0.1",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "alchemy-sdk": "^3.5.5",
+    "dotenv": "^16.4.7",
+    "ethers": "^5.7.2",
+    "ws": "^8.18.1"
   }
 }
