@@ -59,14 +59,19 @@ enable_presale_selector = Web3.keccak(text="enablePresale()").hex()[:8]
 amount = 5  # 示例：购买 5 个 NFT
 value = amount * 10**16  # 0.05 Ether
 presale_txn = contract.functions.presale(amount).build_transaction({
+    'chainId': w3.eth.chain_id,
     'from': buyer_address,
     'maxFeePerGas': 100 * 10**9,  # 示例 gas 费用
     'maxPriorityFeePerGas': 2 * 10**9,
     'nonce': w3.eth.get_transaction_count(buyer_address),
     'value': value,
+    'gas': 100000,
 })
 signed_presale = w3.eth.account.sign_transaction(presale_txn, buyer_private_key)
-raw_presale_tx = signed_presale['rawTransaction'].hex()
+raw_presale_tx = HexBytes(signed_presale.rawTransaction)
+# 将原始交易转换为十六进制字符串
+# raw_presale_tx_hex = HexBytes(raw_presale_tx)
+# print(f"Tx Type:{raw_presale_tx[0]}, Presale Tx: {raw_presale_tx},{type(raw_presale_tx)}")
 
 
 # 恢复原始交易
@@ -85,10 +90,10 @@ def recover_raw_transaction(tx):
     transaction.pop('hash')
     transaction['data']=transaction.pop('input')
     # print(f"Transaction: {transaction}")
-
     unsigned_transaction = serializable_unsigned_transaction_from_dict(transaction)
-    print(f"Unsigned Transaction: {unsigned_transaction}")
-    return "0x" + encode_transaction(unsigned_transaction, vrs=(v, r, s)).hex()
+    raw_transaction = HexBytes("0x" + encode_transaction(unsigned_transaction, vrs=(v, r, s)).hex())
+    print(f"Raw Transaction: {raw_transaction}")
+    return raw_transaction
 
 # WebSocket 监听新交易
 async def listen_pending_transactions():
@@ -105,7 +110,8 @@ async def listen_pending_transactions():
         if "params" in message and "result" in message["params"]:
             tx_hash = message["params"]["result"]
             print(f"New pending transaction: {tx_hash}")
-            try:
+            # try:
+            if True:
                 tx = w3.eth.get_transaction(tx_hash)
                 
                 if (tx and tx['input'].hex()[:8] == enable_presale_selector):
@@ -119,34 +125,37 @@ async def listen_pending_transactions():
                     print(f"type: {type(raw_enable_tx)}, Raw Enable Tx: {raw_enable_tx}")
 
                     # 创建捆绑
-                    bundle_txs = [raw_enable_tx, raw_presale_tx]
+                    # bundle_txs = [raw_enable_tx, raw_presale_tx]
+                    bundle_txs = [
+                    {"signed_transaction": raw_enable_tx},
+                    {"signed_transaction": raw_presale_tx},
+                    ]
                     # bundle_txs = [raw_presale_tx]
 
                     current_block = w3.eth.block_number
-                    target_block = current_block + 1
+                    # target_block = current_block + 1
                     # target_block_hex = hex(target_block)
                     print(f"Bundle Tx: {bundle_txs}")
-                    print(f"Type: {type(target_block)}, Target Block: {target_block}")
+                    # print(f"Type: {type(target_block)}, Target Block: {target_block}")
 
                     # 发送捆绑
-                    send_result = flashbot_w3.flashbots.send_bundle(bundle_txs, target_block)
-                    print(f"Send Result: {send_result}")
-                    bundle_hash = send_result.bundle_hash()
+                    send_result = flashbot_w3.flashbots.send_bundle(bundle_txs, target_block_number=current_block + 1)
+                    bundle_hash = w3.to_hex(send_result.bundle_hash())
                     print(f"Bundle hash: {bundle_hash}")
 
                     # 获取捆绑状态
                     # stats = await flashbots.get_bundle_stats(bundle_hash)
-                    stats = await w3.flashbots.get_bundle_stats(bundle_hash)
+                    stats = w3.flashbots.get_bundle_stats(bundle_hash, current_block + 1)
 
-                    # 打印结果
-                    print(f"Enable Presale Tx Hash: {tx_hash}")
-                    print(f"Presale Tx Hash: {signed_presale['hash'].hex()}")
+                    # 打印结果链接
+                    print(f"Enable Presale Tx: https:sepolia.etherscan.io/tx/{tx_hash}")
+                    print(f"Presale Tx Hash: https:sepolia.etherscan.io/tx/{signed_presale['hash'].hex()}")
                     print(f"Bundle Stats: {stats}")
 
                     ws.close()
                     break
-            except Exception as e:
-                print(f"Error processing tx {tx_hash}: {e}")
+            # except Exception as e:
+                # print(f"Error processing tx {tx_hash}: {e}")
         await asyncio.sleep(0.1)  # 避免阻塞
 
 # 运行异步监听
