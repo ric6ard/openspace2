@@ -1,7 +1,7 @@
 {
   "transactions": [
     {
-      "hash": "0xe33658e1d227cac7c4d3f32df027d6e20011624ddc601b69b081aaae3bc5ea22",
+      "hash": null,
       "transactionType": "CREATE",
       "contractName": "OpenspaceNFT",
       "contractAddress": "0xb6907c2747c462834fc25fb4e76b4c0f51a1f536",
@@ -19,44 +19,11 @@
       "isFixedGasLimit": false
     }
   ],
-  "receipts": [
-    {
-      "status": "0x1",
-      "cumulativeGasUsed": "0xa93e2f",
-      "logs": [
-        {
-          "address": "0xb6907c2747c462834fc25fb4e76b4c0f51a1f536",
-          "topics": [
-            "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x000000000000000000000000e9d2e42129c04f5627f7894aabd422b8a76737ad"
-          ],
-          "data": "0x",
-          "blockHash": "0x0816e3c655b23a723b5f8e4622e24bde8b0c57ee4d110026523bd030800634f8",
-          "blockNumber": "0x15191f3",
-          "transactionHash": "0xe33658e1d227cac7c4d3f32df027d6e20011624ddc601b69b081aaae3bc5ea22",
-          "transactionIndex": "0x55",
-          "logIndex": "0xda",
-          "removed": false
-        }
-      ],
-      "logsBloom": "0x00000000000000000000000000000000000000000000000000800000000000200000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000001000000000000000000000000000000000000020000000000000000000800000000000000000000000000000000400000000000000000000000000000000000000000000000000008000000000000000000000000000000000002000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000001000000020000000000000000000000000000000000000000000000000000000000000000000",
-      "type": "0x2",
-      "transactionHash": "0xe33658e1d227cac7c4d3f32df027d6e20011624ddc601b69b081aaae3bc5ea22",
-      "transactionIndex": "0x55",
-      "blockHash": "0x0816e3c655b23a723b5f8e4622e24bde8b0c57ee4d110026523bd030800634f8",
-      "blockNumber": "0x15191f3",
-      "gasUsed": "0x10ded4",
-      "effectiveGasPrice": "0x1b516790",
-      "from": "0xe9d2e42129c04f5627f7894aabd422b8a76737ad",
-      "to": null,
-      "contractAddress": "0xb6907c2747c462834fc25fb4e76b4c0f51a1f536"
-    }
-  ],
+  "receipts": [],
   "libraries": [],
   "pending": [],
   "returns": {},
-  "timestamp": 1742894526,
+  "timestamp": 1742894152,
   "chain": 1,
   "commit": "9e6fcd0"
 }
