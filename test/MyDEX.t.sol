@@ -198,7 +198,7 @@ contract MyDexTest is Test {
         }
     }
 
-    function testGetPairAddress() public {
+    function testGetPairAddress() public view{
         // 测试 MyDex 的 getPairAddress 函数是否返回正确的交易对地址
         address pair = factory.getPair(address(rntToken), WETH);
         address calculatedPair = myDex.getPairAddress(address(rntToken), WETH);
