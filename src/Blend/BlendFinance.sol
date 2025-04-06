@@ -97,6 +97,8 @@ contract BlendFinance is Ownable, ReentrancyGuard {
     event FeesWithdrawn(address indexed admin, uint256 amount);
     event MaturityAdded(uint256 indexed maturity, address bondToken);
 
+    event TestMessage(string message);
+
     constructor(address _usdc, address _uniswapRouter, address _positionManager) Ownable(msg.sender) {
         usdc = _usdc;
         uniswapRouter = ISwapRouter(_uniswapRouter);
@@ -119,6 +121,7 @@ contract BlendFinance is Ownable, ReentrancyGuard {
         supportedMaturities[maturityCount] = date;
         maturityCount++;
         emit MaturityAdded(date, address(bondToken));
+        // emit TestMessage(symbol);
     }
 
     function setFeeRate(uint256 _feeRate) external onlyOwner {

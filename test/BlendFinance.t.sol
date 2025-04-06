@@ -188,4 +188,16 @@ contract BlendFinanceTest is Test {
         vm.stopPrank();
     }
 
+    function testAddMaturity () public {
+        vm.startPrank(address(blend.owner()));
+
+        // Add new maturity
+        blend.addMaturity(block.timestamp + 30 days);
+        
+        // Verify maturity added
+        uint256 maturity = blend.supportedMaturities(1);
+        assertEq(maturity, block.timestamp + 30 days, "Maturity not added");
+        vm.stopPrank();
+    }
+
 }

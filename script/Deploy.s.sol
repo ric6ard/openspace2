@@ -8,6 +8,20 @@ import "../src/SimpleMultiSig.sol";
 import "../src/LLCToken2612.sol";
 import "../src/TokenBank.sol";
 import "../src/NFTPersaleFollowing/NFTPersale.sol";
+import "../src/Blend/BlendFinance.sol";
+
+contract DeployBlendFinance is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey); //开始广播交易
+        new BlendFinance(
+            0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238,
+            0xE9d2E42129C04f5627f7894aABD422B8a76737aD,
+            0xE9d2E42129C04f5627f7894aABD422B8a76737aD
+        );
+        vm.stopBroadcast();
+    }
+}
 
 contract DeployOpenSpaceNFT is Script {
     function run() external {
