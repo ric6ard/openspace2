@@ -33,6 +33,7 @@ contract BlendFinanceTest is Test {
         // Mint tokens for testing
         usdc.mint(alice, 10000 ether);
         usdc.mint(bob, 10000 ether);
+        usdc.mint(address(blend), 10000 ether);
         collateralToken.mint(alice, 1000 ether);
 
         // Add collateral and maturity
@@ -72,28 +73,26 @@ contract BlendFinanceTest is Test {
 
         // Issue bond
         blend.issueBond(address(collateralToken), 100 ether, 50 ether, 0);
+        // Issue more bonds to cover the repayment and fees
+        blend.issueBond(address(collateralToken), 2 ether, 1 ether, 0);
 
-        // Repay bond
         (,,address bondTokenAddr,,,) = blend.userBonds(alice, 0);
         BondToken bondToken = BondToken(bondTokenAddr);
-        // bondToken.mint(alice, 50 ether); // Mint bond tokens for repayment
         bondToken.approve(address(blend), type(uint256).max);
-
         blend.repayBond(0);
 
-        // Verify bond is repaid
-        // Verify bond is repaid
         (,,,uint256 bondAmount,,bool isActive) = blend.userBonds(alice, 0);
         assertEq(bondAmount, 0, "Bond not repaid");
         assertEq(isActive, false, "Bond not repaid");
+
         vm.stopPrank();
     }
-
     function testClaimMatured() public {
         vm.startPrank(alice);
 
         // Mock price feed to return a price
         vm.mockCall(priceFeed, abi.encodeWithSelector(AggregatorV3Interface.latestRoundData.selector), abi.encode(0, 2e8, 0, 0, 0)); // Price = 2 USDC
+        uint256 previousBalance =  usdc.balanceOf(alice); // Check USDC balance
 
         // Issue bond
         blend.issueBond(address(collateralToken), 100 ether, 50 ether, 0);
@@ -111,7 +110,10 @@ contract BlendFinanceTest is Test {
         blend.claimMatured(bondTokenAddr);
 
         // Verify USDC balance
-        assertEq(usdc.balanceOf(alice), 50 ether, "Incorrect USDC balance after claim");
+        uint256 feeRate = blend.feeRate();
+        uint256 expectedBalance = previousBalance + (50 ether * (1e18 - feeRate)) / 1e18;
+
+        assertEq(usdc.balanceOf(alice), expectedBalance, "Incorrect USDC balance after claim");
 
         vm.stopPrank();
     }
@@ -129,9 +131,10 @@ contract BlendFinanceTest is Test {
         vm.startPrank(bob);
 
         // Mock price drop
-        vm.mockCall(priceFeed, abi.encodeWithSelector(AggregatorV3Interface.latestRoundData.selector), abi.encode(0, 11e7, 0, 0, 0)); // Price = 1.1 USDC
+        vm.mockCall(priceFeed, abi.encodeWithSelector(AggregatorV3Interface.latestRoundData.selector), abi.encode(0, 59e6, 0, 0, 0)); // Price = 0.59 USDC
 
         // Liquidate bond
+        usdc.approve(address(blend), type(uint256).max);
         blend.liquidate(alice, 0);
 
         // Verify bond is liquidated
@@ -152,12 +155,37 @@ contract BlendFinanceTest is Test {
         vm.startPrank(address(blend.owner()));
 
         // Withdraw fees
-        address bondToken = blend.bondTokens(0); // 获取 bondToken 地址
-        blend.withdrawFees(bondToken);
+        (,,address bondTokenAddr,,,) = blend.userBonds(alice, 0);
+        blend.withdrawFees(bondTokenAddr);
 
         // Verify fee balance
         assertEq(usdc.balanceOf(blend.owner()), blend.feeBalance(), "Incorrect fee balance");
 
         vm.stopPrank();
     }
+
+    function testSetFeeRate() public {
+        vm.startPrank(address(blend.owner()));
+
+        // Set new fee rate
+        blend.setFeeRate(0.002e18); // 0.2%
+
+        // Verify fee rate
+        assertEq(blend.feeRate(), 0.002e18, "Incorrect fee rate");
+
+        vm.stopPrank();
+    }
+
+    function testAddCollateral () public {
+        vm.startPrank(address(blend.owner()));
+
+        // Add new collateral
+        blend.addCollateral(address(collateralToken), 1.5e18, priceFeed); // 150% collateral ratio
+
+        // Verify collateral added
+        (bool isSupported,,) = blend.supportedCollaterals(address(collateralToken));
+        assertTrue(isSupported, "Collateral not added");
+        vm.stopPrank();
+    }
+
 }

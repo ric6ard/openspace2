@@ -101,7 +101,8 @@ contract BlendFinance is Ownable, ReentrancyGuard {
         usdc = _usdc;
         uniswapRouter = ISwapRouter(_uniswapRouter);
         positionManager = INonfungiblePositionManager(_positionManager);
-        feeRate = 0;
+        feeRate = 5e15; // 0.5%
+        // feeRate = 0;
         liquidationThreshold = 1.2e18; // 120%
         liquidationDiscount = 0.9e18; // 90%
     }
@@ -164,9 +165,10 @@ contract BlendFinance is Ownable, ReentrancyGuard {
             borrower: msg.sender,
             isActive: true
         }));
-
+        BondToken(bondTokenAddr).mint(address(this), fee);
         BondToken(bondTokenAddr).mint(msg.sender, netBondAmount);
         emit BondIssued(msg.sender, bondTokenAddr, netBondAmount);
+
     }
 
     function repayBond(uint256 bondIndex) external nonReentrant {
@@ -178,6 +180,7 @@ contract BlendFinance is Ownable, ReentrancyGuard {
         uint256 amount = bond.bondAmount;
         BondToken bondToken = BondToken(bond.bondToken);
         uint256 fee = (amount * feeRate) / 1e18;
+        require(bondToken.balanceOf(msg.sender) >= amount + fee, "Insufficient bond tokens");
         bondToken.transferFrom(msg.sender, address(this), amount + fee);
         bondToken.burn(amount);
 
@@ -205,7 +208,7 @@ contract BlendFinance is Ownable, ReentrancyGuard {
         feeBalance += fee; // 单位为 bondToken
         uint256 netAmount = amount - fee;
         if (IERC20(usdc).balanceOf(address(this)) < netAmount ) {
-            // TODO 通过 Uniswap 将 抵押物 转换为 USDC
+            // TODO 如果USDC不足, 通过 Uniswap 将 抵押物 转换为 USDC
             revert("Insufficient USDC");
         }
 
@@ -219,7 +222,6 @@ contract BlendFinance is Ownable, ReentrancyGuard {
 
         uint256 collValue = getCollateralValue(bond.collateralToken, bond.collateralAmount);
         require(collValue < (bond.bondAmount * liquidationThreshold) / 1e18, "Not liquidatable");
-
         uint256 collValueAfterDiscount = (collValue * liquidationDiscount) / 1e18;
         require(IERC20(usdc).transferFrom(msg.sender, address(this), collValueAfterDiscount), "Payment failed");
 
@@ -232,7 +234,7 @@ contract BlendFinance is Ownable, ReentrancyGuard {
     }
 
     function provideLiquidity(address token0, address token1, uint256 amount0Desired, uint256 amount1Desired) external {
-        // Placeholder for Uniswap V3 LP logic
+        //TODO Placeholder for Uniswap V3 LP logic
     }
 
     function withdrawFees(address bondToken) external onlyOwner {
@@ -240,19 +242,22 @@ contract BlendFinance is Ownable, ReentrancyGuard {
         require(amount > 0, "No fees to withdraw");
         feeBalance = 0;
 
-        // 假设通过 Uniswap 将 bondToken 转换为 USDC
-        BondToken(bondToken).approve(address(uniswapRouter), amount);
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
-            tokenIn: bondToken,
-            tokenOut: usdc,
-            fee: 3000, // 0.3% fee tier
-            recipient: owner(),
-            deadline: block.timestamp + 15,
-            amountIn: amount,
-            amountOutMinimum: 0, // 需设置滑点保护
-            sqrtPriceLimitX96: 0
-        });
-        uint256 amountOut = uniswapRouter.exactInputSingle(params);
+        
+        // BondToken(bondToken).approve(address(uniswapRouter), amount);
+        uint256 amountOut = amount; // Placeholder for actual swap amount
+        BondToken(bondToken).transfer(msg.sender, amount);
+        //TODO 假设通过 Uniswap 将 bondToken 转换为 USDC
+        // ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+        //     tokenIn: bondToken,
+        //     tokenOut: usdc,
+        //     fee: 3000, // 0.3% fee tier
+        //     recipient: owner(),
+        //     deadline: block.timestamp + 15,
+        //     amountIn: amount,
+        //     amountOutMinimum: 0, // 需设置滑点保护
+        //     sqrtPriceLimitX96: 0
+        // });
+        // uint256 amountOut = uniswapRouter.exactInputSingle(params);
         emit FeesWithdrawn(owner(), amountOut);
     }
 
